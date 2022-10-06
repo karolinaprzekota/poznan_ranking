@@ -22,6 +22,7 @@ class RestaurantsPageContent extends StatelessWidget {
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
                   .collection('restaurants')
+                  .orderBy('rating', descending: false)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
