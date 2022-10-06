@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:poznan_ranking/app/home/add_opinion/add_opinion_page_content.dart';
+import 'package:poznan_ranking/app/home/my_account/my_account_page_content.dart';
+import 'package:poznan_ranking/app/home/restaurants/restaurants_page_content.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -18,32 +21,17 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Najlepszy burger w Poznaniu'),
+      ),
       body: Builder(builder: (context) {
         if (currentIndex == 0) {
-          return const Center(
-            child: Text('Jeden'),
-          );
+          return const RestaurantsPageContent();
         }
         if (currentIndex == 1) {
-          return const Center(
-            child: Text('Dwa'),
-          );
+          return const AddOpinionPageContent();
         }
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Jesteś zalogowany jako ${widget.user.email}'),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                },
-                child: const Text('Wyloguj się'),
-              ),
-            ],
-          ),
-        );
+        return MyAccountPageContent(email: widget.user.email);
       }),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
