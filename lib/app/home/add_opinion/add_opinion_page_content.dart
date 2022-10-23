@@ -56,6 +56,7 @@ class _AddOpinionPageContentState extends State<AddOpinionPageContent> {
               value: rating,
               min: 1.0,
               max: 6.0,
+              // ignore: non_constant_identifier_names
               onChanged: (NewValue) {
                 setState(
                   () {
