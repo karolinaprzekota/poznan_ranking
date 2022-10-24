@@ -1,15 +1,16 @@
 import 'dart:async';
+
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 
-part 'restaurants_state.dart';
+part 'root_state.dart';
 
-class RestaurantsCubit extends Cubit<RestaurantsState> {
-  RestaurantsCubit()
+class RootCubit extends Cubit<RootState> {
+  RootCubit()
       : super(
-          const RestaurantsState(
-            documents: [],
+          const RootState(
+            user: null,
             errorMessage: '',
             isLoading: false,
           ),
@@ -17,23 +18,23 @@ class RestaurantsCubit extends Cubit<RestaurantsState> {
 
   StreamSubscription? _streamSubscription;
 
+  Future<void> signOut() async {
+    FirebaseAuth.instance.signOut();
+  }
+
   Future<void> start() async {
     emit(
-      const RestaurantsState(
-        documents: [],
+      const RootState(
+        user: null,
         errorMessage: '',
         isLoading: true,
       ),
     );
-    _streamSubscription = FirebaseFirestore.instance
-        .collection('restaurants')
-        .orderBy('rating', descending: true)
-        .snapshots()
-        .listen(
-      (data) {
+    _streamSubscription = FirebaseAuth.instance.authStateChanges().listen(
+      (user) {
         emit(
-          RestaurantsState(
-            documents: data.docs,
+          RootState(
+            user: user,
             errorMessage: '',
             isLoading: false,
           ),
@@ -42,8 +43,8 @@ class RestaurantsCubit extends Cubit<RestaurantsState> {
     )..onError(
         (error) {
           emit(
-            RestaurantsState(
-              documents: const [],
+            RootState(
+              user: null,
               errorMessage: error.toString(),
               isLoading: false,
             ),
