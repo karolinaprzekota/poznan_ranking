@@ -33,7 +33,7 @@ class RootCubit extends Cubit<RootState> {
               user: user,
               errorMessage: '',
               isLoading: false,
-              isCreatingAccount: true),
+              isCreatingAccount: false),
         );
       },
     )..onError(
