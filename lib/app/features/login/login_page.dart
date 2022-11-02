@@ -1,7 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:poznan_ranking/app/cubit/root_cubit.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   LoginPage({
     Key? key,
   }) : super(key: key);
@@ -10,98 +11,73 @@ class LoginPage extends StatefulWidget {
   final passwordcontroller = TextEditingController();
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  var errorMessage = '';
-  var isCreatingAccount = false;
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(isCreatingAccount == true
-                  ? 'Zarejestruj się'
-                  : 'Zaloguj się'),
-              const SizedBox(
-                height: 20,
+    return BlocProvider(
+      create: (context) => RootCubit(),
+      child: BlocBuilder<RootCubit, RootState>(
+        builder: (context, state) {
+          return Scaffold(
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(state.isCreatingAccount == true
+                          ? 'Zarejestruj się'
+                          : 'Zaloguj się'),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      TextField(
+                        decoration: const InputDecoration(hintText: 'E-mail'),
+                        controller: emailcontroller,
+                      ),
+                      TextField(
+                          decoration: const InputDecoration(hintText: 'Hasło'),
+                          controller: passwordcontroller,
+                          obscureText: true),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Text(state.errorMessage),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (state.isCreatingAccount == false) {
+                            //register
+                            await context.read<RootCubit>().register(
+                                emailcontroller: emailcontroller.text,
+                                passwordcontroller: passwordcontroller.text);
+                          } else {
+                            if (state.isCreatingAccount == true) {
+                              //signIn
+                              context.read<RootCubit>().signIn(
+                                  emailcontroller: emailcontroller.text,
+                                  passwordcontroller: passwordcontroller.text);
+                            }
+                          }
+                        },
+                        child: Text(state.isCreatingAccount == true
+                            ? 'Zarejestruj się'
+                            : 'Zaloguj się'),
+                      ),
+                      const SizedBox(height: 20),
+                      if (state.isCreatingAccount == false) ...[
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(state.isCreatingAccount == false
+                              ? 'Utwórz konto'
+                              : 'Masz już konto?'),
+                        ),
+                      ]
+                    ]),
               ),
-              TextField(
-                decoration: const InputDecoration(hintText: 'E-mail'),
-                controller: widget.emailcontroller,
-              ),
-              TextField(
-                  decoration: const InputDecoration(hintText: 'Hasło'),
-                  controller: widget.passwordcontroller,
-                  obscureText: true),
-              const SizedBox(
-                height: 20,
-              ),
-              Text(errorMessage),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  if (isCreatingAccount == true) {
-                    //rejestracja
-                    try {
-                      await FirebaseAuth.instance
-                          .createUserWithEmailAndPassword(
-                              email: widget.emailcontroller.text,
-                              password: widget.passwordcontroller.text);
-                    } catch (error) {
-                      setState(() {
-                        errorMessage = error.toString();
-                      });
-                    }
-                  } else {
-                    //logowanie
-                    try {
-                      await FirebaseAuth.instance.signInWithEmailAndPassword(
-                          email: widget.emailcontroller.text,
-                          password: widget.passwordcontroller.text);
-                    } catch (error) {
-                      setState(() {
-                        errorMessage = error.toString();
-                      });
-                    }
-                  }
-                },
-                child: Text(isCreatingAccount == true
-                    ? 'Zarejestruj się'
-                    : 'Zaloguj się'),
-              ),
-              const SizedBox(height: 20),
-              if (isCreatingAccount == false) ...[
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      isCreatingAccount = true;
-                    });
-                  },
-                  child: const Text('Utwórz konto'),
-                ),
-              ],
-              if (isCreatingAccount == true) ...[
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      isCreatingAccount = false;
-                    });
-                  },
-                  child: const Text('Masz już konto?'),
-                ),
-              ],
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
